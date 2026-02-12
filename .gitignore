@@ -1,0 +1,29 @@
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+
+# Node/JS
+node_modules/
+dist/
+build/
+coverage/
+
+# Database
+*.db
+backend/chronovault.db
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# System
+.DS_Store
+
+# Agent
+.gemini/
+.agent/

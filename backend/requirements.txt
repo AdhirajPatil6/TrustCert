@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+py-algorand-sdk
+pyteal
+requests
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
