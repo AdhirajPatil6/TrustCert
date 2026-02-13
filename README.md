@@ -163,32 +163,6 @@ Development:
 
 ---
 
-## 📂 Important Files to Review
-
-Judges may look at:
-
-- `/contracts/approval.teal` → Smart contract logic
-- `/contracts/clear.teal` → State reset logic
-- `/backend/verify_flow.py` → Certificate verification flow
-- `/backend/init_db.py` → Versioned record initialization
-- `/backend/debug_time.py` → Time-based logic testing
-- `/frontend/` → UI implementation
-
----
-
-## 🚀 How to Run
-
-1. Start LocalNet (optional for development):
-   algokit localnet start
-
-2. Install backend dependencies
-3. Configure TestNet API endpoint
-4. Fund TestNet wallet via AlgoKit faucet
-5. Deploy smart contract
-6. Run frontend locally
-
----
-
 ## 🎯 Impact
 
 TrustCert transforms campus governance from trust-based to proof-based systems.
