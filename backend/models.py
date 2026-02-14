@@ -99,3 +99,13 @@ class GovernancePolicy(Base):
     is_active = Column(Boolean, default=False)
     activation_date = Column(DateTime)
     is_frozen = Column(Boolean, default=False) # Cannot edit if frozen
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    action = Column(String) # "CREATE_CERT", "REVOKE_CERT", "DELETE_CERT", "LOGIN"
+    target_id = Column(String) # ID of the object affected (e.g. Cert ID)
+    details = Column(String) # JSON or text description
+    actor_username = Column(String) # Who performed it
+    timestamp = Column(DateTime, default=datetime.utcnow)

@@ -115,3 +115,14 @@ class PolicyResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class AuditLogResponse(BaseModel):
+    id: int
+    action: str
+    target_id: str
+    details: str
+    actor_username: str
+    timestamp: datetime
+    
+    class Config:
+        from_attributes = True

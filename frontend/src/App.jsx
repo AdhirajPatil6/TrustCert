@@ -48,6 +48,11 @@ function App() {
   const [decryptedKeys, setDecryptedKeys] = useState({});
   const [copiedId, setCopiedId] = useState(null);
 
+  // Admin Dashboard State
+  const [adminTab, setAdminTab] = useState('dashboard');
+  const [studentTab, setStudentTab] = useState('dashboard');
+
+
   // --- Auth Helpers ---
   const getHeaders = () => ({ headers: { Authorization: `Bearer ${token}` } });
 
@@ -94,7 +99,8 @@ function App() {
       setToken(res.data.access_token);
       localStorage.setItem('token', res.data.access_token);
     } catch (err) {
-      setMessage({ type: 'error', text: "Login Failed: Check credentials" });
+      const msg = err.response?.data?.detail || err.message;
+      setMessage({ type: 'error', text: "Login Failed: " + msg });
     }
   };
 
@@ -346,67 +352,140 @@ function App() {
     )
   }
 
+
+
+  const NavPill = () => (
+    <div className="pill-nav-container">
+      <nav className="pill-nav">
+        {user?.role === 'admin' ? (
+          <>
+            <button className={`pill-nav-item ${adminTab === 'overview' ? 'active' : ''}`} onClick={() => setAdminTab('overview')}>Overview</button>
+            <button className={`pill-nav-item ${adminTab === 'create' ? 'active' : ''}`} onClick={() => setAdminTab('create')}>Create</button>
+            <button className={`pill-nav-item ${adminTab === 'certificates' ? 'active' : ''}`} onClick={() => setAdminTab('certificates')}>Certificates</button>
+            <button className={`pill-nav-item ${adminTab === 'audit' ? 'active' : ''}`} onClick={() => setAdminTab('audit')}>Audit Log</button>
+          </>
+        ) : user?.role === 'faculty' ? (
+          <>
+            <button className={`pill-nav-item ${adminTab === 'overview' ? 'active' : ''}`} onClick={() => setAdminTab('overview')}>Overview</button>
+            <button className={`pill-nav-item ${adminTab === 'write' ? 'active' : ''}`} onClick={() => setAdminTab('write')}>Write Record</button>
+            <button className={`pill-nav-item ${adminTab === 'approvals' ? 'active' : ''}`} onClick={() => setAdminTab('approvals')}>Approvals</button>
+            <button className={`pill-nav-item ${adminTab === 'history' ? 'active' : ''}`} onClick={() => setAdminTab('history')}>History</button>
+          </>
+        ) : user?.role === 'student' ? (
+          <>
+            <button className={`pill-nav-item ${studentTab === 'dashboard' ? 'active' : ''}`} onClick={() => setStudentTab('dashboard')}>Dashboard</button>
+            <button className={`pill-nav-item ${studentTab === 'certificates' ? 'active' : ''}`} onClick={() => setStudentTab('certificates')}>Certificates</button>
+            <button className={`pill-nav-item ${studentTab === 'records' ? 'active' : ''}`} onClick={() => setStudentTab('records')}>Records</button>
+            <button className={`pill-nav-item ${studentTab === 'verification' ? 'active' : ''}`} onClick={() => setStudentTab('verification')}>Verification</button>
+            <button className={`pill-nav-item ${studentTab === 'profile' ? 'active' : ''}`} onClick={() => setStudentTab('profile')}>Profile</button>
+          </>
+        ) : null}
+      </nav>
+    </div>
+  );
+
   return (
     <div className="app-container">
+      {/* Header / Navbar */}
       <nav>
-        <div className="logo"><FiShield /> TrustCert</div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <span><FiUser style={{ marginRight: '8px' }} /> {user?.username}</span>
-          <button className="secondary-btn icon-btn" onClick={logout} title="Logout"><FiLogOut /></button>
+        <div className="nav-content">
+          <div className="logo" onClick={() => setView('landing')} style={{ cursor: 'pointer' }}>
+            TrustCert
+          </div>
+
+          {!user ? (
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="secondary-btn" onClick={() => setView('verify')}>Verifier Public</button>
+              <button className="primary-btn" onClick={() => setView('login')}>Login</button>
+            </div>
+          ) : (
+            <>
+              {/* Central Navigation Pills */}
+              <NavPill />
+
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <span><FiUser style={{ marginRight: '8px' }} /> {user?.username}</span>
+                <button className="secondary-btn icon-btn" onClick={logout} title="Logout"><FiLogOut /></button>
+              </div>
+            </>
+          )}
         </div>
       </nav>
 
-      {renderMessage()}
+      <div className="layout-wrapper">
 
-      {view === 'dashboard' && (
-        <div style={{ width: '100%' }}>
-          {user?.role === 'admin' && <DashboardAdmin token={token} user={user} />}
-          {user?.role === 'faculty' && <DashboardFaculty token={token} user={user} />}
-          {user?.role === 'student' && <DashboardStudent token={token} />}
-        </div>
-      )}
+        {renderMessage()}
 
-      {view === 'verify' && <DashboardVerifier />}
-
-      {view === 'create' && (
-        <div className="card">
-          <h2>New Time Vault</h2>
-
-          <div className="form-group">
-            <label>Select File to Encrypt</label>
-            <InputGroup icon={FiFile}>
-              <input type="file" onChange={e => setFormData({ ...formData, file: e.target.files[0] })} />
-            </InputGroup>
-          </div>
-
-          <div className="form-group">
-            <label>Unlock Date (Local Time)</label>
-            <InputGroup icon={FiCalendar}>
-              <DatePicker
-                selected={formData.unlockTime}
-                onChange={(date) => setFormData({ ...formData, unlockTime: date })}
-                showTimeSelect
-                dateFormat="Pp"
-                minDate={new Date()}
-                placeholderText="Select Unlock Time"
-                className="date-picker-input"
+        {view === 'dashboard' && (
+          <div style={{ width: '100%' }}>
+            {user?.role === 'admin' && (
+              <DashboardAdmin
+                token={token}
+                user={user}
+                activeTab={adminTab}
+                setActiveTab={setAdminTab}
               />
-            </InputGroup>
+            )}
+            {user?.role === 'faculty' && (
+              <DashboardFaculty
+                token={token}
+                user={user}
+                activeTab={adminTab}
+                setActiveTab={setAdminTab}
+              />
+            )}
+            {user?.role === 'student' && (
+              <DashboardStudent
+                token={token}
+                activeTab={studentTab}
+                setActiveTab={setStudentTab}
+              />
+            )}
           </div>
+        )}
 
-          <div className="form-group">
-            <label>Beneficiary Address</label>
-            <InputGroup icon={FiHash}>
-              <input type="text" placeholder="Algorand Address..." onChange={(e) => setFormData({ ...formData, beneficiary: e.target.value })} />
-            </InputGroup>
+        {view === 'verify' && <DashboardVerifier />}
+
+        {view === 'create' && (
+          <div className="card">
+            <h2>New Time Vault</h2>
+
+            <div className="form-group">
+              <label>Select File to Encrypt</label>
+              <InputGroup icon={FiFile}>
+                <input type="file" onChange={e => setFormData({ ...formData, file: e.target.files[0] })} />
+              </InputGroup>
+            </div>
+
+            <div className="form-group">
+              <label>Unlock Date (Local Time)</label>
+              <InputGroup icon={FiCalendar}>
+                <DatePicker
+                  selected={formData.unlockTime}
+                  onChange={(date) => setFormData({ ...formData, unlockTime: date })}
+                  showTimeSelect
+                  dateFormat="Pp"
+                  minDate={new Date()}
+                  placeholderText="Select Unlock Time"
+                  className="date-picker-input"
+                />
+              </InputGroup>
+            </div>
+
+            <div className="form-group">
+              <label>Beneficiary Address</label>
+              <InputGroup icon={FiHash}>
+                <input type="text" placeholder="Algorand Address..." onChange={(e) => setFormData({ ...formData, beneficiary: e.target.value })} />
+              </InputGroup>
+            </div>
+
+            <button className="primary-btn" onClick={createVault} disabled={loading}>
+              {loading ? "Encrypting & Minting..." : "Seal Vault in Smart Contract"}
+            </button>
+            <button className="secondary-btn" onClick={() => { setMessage(null); setView('dashboard'); }}>Cancel</button>
           </div>
-
-          <button className="primary-btn" onClick={createVault} disabled={loading}>
-            {loading ? "Encrypting & Minting..." : "Seal Vault in Smart Contract"}
-          </button>
-          <button className="secondary-btn" onClick={() => { setMessage(null); setView('dashboard'); }}>Cancel</button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
